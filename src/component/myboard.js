@@ -11,6 +11,7 @@ class Myboard extends Component {
         this.state.myimages = []
         this.addImage = this.addImage.bind(this)
         this.deleteImage = this.deleteImage.bind(this)
+        this.getFocus = this.getFocus.bind(this)
     }
     componentDidMount() {
         if (store.user_name)
@@ -21,6 +22,12 @@ class Myboard extends Component {
                 this.setState({ myimages: res.data })
             })
             .catch(console.error)
+    }
+    getFocus(e) {
+        e.preventDefault()
+        let el = document.getElementById('scroll')
+        el.scrollIntoView(false)
+        document.getElementById("input_focus").focus()
     }
     addImage(e) {
         e.preventDefault()
@@ -61,10 +68,10 @@ class Myboard extends Component {
                     })}
                     <br /><br /><br />
                 </div>
-                <a className='font' type="button" data-toggle="collapse" href="#demo">ADD IMAGES</a><br /><br />
+                <a className='font' type="button" data-toggle="collapse" href="#demo" onClick={this.getFocus}>ADD IMAGES</a><br /><br />
                 <div id="demo" className="collapse text-center">
-                    <form onSubmit={this.addImage}>
-                        <input className='text' ref='title' placeholder='Enter image title' /><br /><br />
+                    <form  id='scroll' onSubmit={this.addImage}>
+                        <input id='input_focus' className='text' ref='title' placeholder='Enter image title' /><br /><br />
                         <input className='text' ref='link' placeholder='Enter image link' /><br /><br />
                         <button type='submit' className='btn btn-default'>Submit</button>
                     </form>
