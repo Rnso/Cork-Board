@@ -5,7 +5,7 @@
   "description": "Cork Board",
   "main": "server.js",
   "scripts": {
-    "start": "babel-node server.js",
+    "start": "nodemon --exec babel-node server.js --ignore public/",
     "dev": "webpack-dev-server --inline --hot",
     "build": "webpack -wd",
     "prod": "NODE_ENV=production webpack -wp"
