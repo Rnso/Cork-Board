@@ -65,8 +65,10 @@ class Board extends Component {
                         return <div key={i} className="masonry_layout_panel_content">
                             <img src={item.link} alt={item.title} width='99%' onError={this.handleBrokenImages} />
                             <h4>{item.title}</h4>
+                            <p>
                             <a href='' onClick={this.filterByUser}>{item.user_name}</a>&nbsp;&nbsp;&nbsp;&nbsp;
                             <a href=''><i id={i} className="fa fa-heart-o" onClick={this.updateHearts}></i>&nbsp;&nbsp;{item.hearts}</a>
+                            </p>
                         </div>
                     })}
                 </div>
