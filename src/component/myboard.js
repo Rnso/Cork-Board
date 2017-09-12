@@ -14,14 +14,30 @@ class Myboard extends Component {
         this.getFocus = this.getFocus.bind(this)
     }
     componentDidMount() {
-        if (store.user_name)
+        if (!store.user_id) {
+            axios.get(constants.serverUrl + `/api/`)
+                .then(res => {
+                    if (res.data != '') {
+                        store.user_id = res.data._id
+                        store.user_name = res.data.name
+                        this.setState({ name: store.user_name })
+                        axios.get(constants.serverUrl + `/api/getmyimages/${store.user_id}`)
+                            .then(res => {
+                                this.setState({ myimages: res.data })
+                            })
+                            .catch(console.error)
+                    }
+                })
+                .catch(console.error())
+        }
+        else {
             this.setState({ name: store.user_name })
-        axios.get(constants.serverUrl + `/api/getmyimages/${store.user_id}`)
-            .then(res => {
-                console.log(res)
-                this.setState({ myimages: res.data })
-            })
-            .catch(console.error)
+            axios.get(constants.serverUrl + `/api/getmyimages/${store.user_id}`)
+                .then(res => {
+                    this.setState({ myimages: res.data })
+                })
+                .catch(console.error)
+        }
     }
     getFocus(e) {
         e.preventDefault()
@@ -38,7 +54,6 @@ class Myboard extends Component {
         let hearts = 0
         axios.post(constants.serverUrl + `/api/addimage`, { user_id, user_name, title, link, hearts })
             .then(res => {
-                console.log(res)
                 this.state.myimages.push(res.data[0])
                 this.setState(this.state.myimages)
             })
@@ -49,7 +64,6 @@ class Myboard extends Component {
         let pin_id = e.target.id
         axios.post(constants.serverUrl + `/api/deleteimage/`, { user_id, pin_id })
             .then(res => {
-                console.log(res)
                 this.setState({ myimages: res.data })
             })
             .catch(console.error)
@@ -70,7 +84,7 @@ class Myboard extends Component {
                 </div>
                 <a className='font' type="button" data-toggle="collapse" href="#demo" onClick={this.getFocus}>ADD IMAGES</a><br /><br />
                 <div id="demo" className="collapse text-center">
-                    <form  id='scroll' onSubmit={this.addImage}>
+                    <form id='scroll' onSubmit={this.addImage}>
                         <input id='input_focus' className='text' ref='title' placeholder='Enter image title' /><br /><br />
                         <input className='text' ref='link' placeholder='Enter image link' /><br /><br />
                         <button type='submit' className='btn btn-default'>Submit</button>

@@ -37,7 +37,6 @@ class Menu extends Component {
         let pwd = this.refs.pwd.value
         axios.post(constants.serverUrl + `/api/login`, { email, pwd })
             .then(res => {
-                //console.log(res)
                 if (res.data != '') {
                     store.user_id = res.data._id
                     store.user_name = res.data.name
@@ -77,7 +76,6 @@ class Menu extends Component {
     logout() {
         axios.get(constants.serverUrl + `/api/logout`)
             .then(res => {
-                //console.log(res)
                 store.user_id = res.data
                 store.user_name = res.data
                 res.data != '' ? this.setState({ isloggedin: true }) : this.setState({ isloggedin: false })
@@ -130,10 +128,12 @@ class Menu extends Component {
                         </div>
                         <div className="collapse navbar-collapse" id="myNavbar">
                             {this.state.isloggedin ? <ul className="nav navbar-nav navbar-right">
+                                <li><Link to='/board'>BOARD</Link></li>
                                 <li><Link to='/myboard'>MY BOARD</Link></li>
                                 <li><Link to='/' onClick={this.logout}>LOGOUT</Link></li>
                             </ul> :
                                 <ul className="nav navbar-nav navbar-right">
+                                    <li><Link to='/board'>BOARD</Link></li>
                                     <li><Link to='/board' onClick={this.showLoginModal}>LOGIN</Link></li>
                                     <li><Link to='/register'>SIGN UP</Link></li>
                                 </ul>

@@ -3,19 +3,32 @@ import * as constants from '../../constant.js'
 import axios from 'axios'
 import '../app.css'
 import store from './store'
+import img from '../img/broken_image.png'
 
 class Board extends Component {
     constructor(props) {
         super(props)
         this.state = {}
-        //this.state.hearts = ''
         this.state.images = []
+        this.handleBrokenImages = this.handleBrokenImages.bind(this)
+        this.filterByUser = this.filterByUser.bind(this)
         this.updateHearts = this.updateHearts.bind(this)
     }
     componentDidMount() {
         axios.get(constants.serverUrl + `/api/getallimages`)
             .then(res => {
-                console.log(res)
+                this.setState({ images: res.data })
+            })
+            .catch(console.error)
+    }
+    handleBrokenImages(e) {
+        e.target.src = img
+    }
+    filterByUser(e) {
+        e.preventDefault()
+        let user = e.target.innerText
+        axios.post(constants.serverUrl + `/api/filterbyuser/${user}`)
+            .then(res => {
                 this.setState({ images: res.data })
             })
             .catch(console.error)
@@ -50,11 +63,10 @@ class Board extends Component {
                 <div className="masonry_layout">
                     {this.state.images.map((item, i) => {
                         return <div key={i} className="masonry_layout_panel_content">
-                            <img src={item.link} alt={item.title} width='99%' />
+                            <img src={item.link} alt={item.title} width='99%' onError={this.handleBrokenImages} />
                             <h4>{item.title}</h4>
-                            <p>{item.user_name}&nbsp;&nbsp;&nbsp;&nbsp;
-                                <a href=''><i id={i} className="fa fa-heart-o" onClick={this.updateHearts}></i>&nbsp;&nbsp;{item.hearts}</a>
-                            </p>
+                            <a href='' onClick={this.filterByUser}>{item.user_name}</a>&nbsp;&nbsp;&nbsp;&nbsp;
+                            <a href=''><i id={i} className="fa fa-heart-o" onClick={this.updateHearts}></i>&nbsp;&nbsp;{item.hearts}</a>
                         </div>
                     })}
                 </div>

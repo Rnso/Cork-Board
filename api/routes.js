@@ -116,4 +116,10 @@ router.post('/updatehearts', (req, res) => {
     })
 })
 
+router.post('/filterbyuser/:user', (req, res) => {
+    mdb.collection('pins').find({user_name: req.params.user}).toArray((err, pins) => {
+        res.send(pins)
+    })
+})
+
 export default router
