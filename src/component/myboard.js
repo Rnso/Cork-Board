@@ -56,6 +56,8 @@ class Myboard extends Component {
             .then(res => {
                 this.state.myimages.push(res.data[0])
                 this.setState(this.state.myimages)
+                this.refs.title.value = ''
+                this.refs.link.value = ''
             })
             .catch(console.error)
     }

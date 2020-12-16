@@ -54,10 +54,16 @@ class Menu extends Component {
         let GoogleAuth = gapi.auth2.getAuthInstance()
         GoogleAuth.signIn()
             .then(GoogleUser => {
+                let name, email
                 if (GoogleUser) {
                     var profile = GoogleUser.getBasicProfile()
-                    let name = profile.getName()
-                    let email = profile.getEmail()
+                    name = profile.getName()
+                    email = profile.getEmail()
+                }
+                else {
+                    this.setState({ isloggedin: false })
+                }
+                if(name !== '' && email !== ''){
                     axios.post(constants.serverUrl + `/api/loginwithgoogle`, { name, email })
                         .then(res => {
                             store.user_id = res.data._id
@@ -66,9 +72,6 @@ class Menu extends Component {
                             $('#loginModal').modal('hide')
                         })
                         .catch(console.error)
-                }
-                else {
-                    this.setState({ isloggedin: false })
                 }
             })
 

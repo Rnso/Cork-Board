@@ -1,14 +1,25 @@
 import express from 'express'
 //import passport from 'passport'
-import { MongoClient, ObjectID } from 'mongodb'
+//import { MongoClient, ObjectID } from 'mongodb'
 import assert from 'assert'
 import config from '../config'
+import { ObjectId } from 'mongodb'
 
-let mdb;
-MongoClient.connect(config.mongodbUri, (err, db) => {
-    assert.equal(null, err)
-    mdb = db
+const MongoClient = require('mongodb').MongoClient
+const client = new MongoClient(config.mongodbUri, { useNewUrlParser: true })
+let database
+let pins
+let users
+client.connect((err, client) => {
+    if (err) console.log('failed to connect')
+    else {
+        console.log('connected')
+        database = client.db('fcc-corkboard')
+        pins = database.collection('pins')
+        users = database.collection('users')
+    }
 })
+
 const router = express.Router()
 
 router.get('/', (req, res) => {
@@ -17,14 +28,14 @@ router.get('/', (req, res) => {
     else {
         res.send('')
     }
-    // mdb.collection('sessions').findOne({ _id: req.sessionID }).then(sess => {       
+    // database.collection('sessions').findOne({ _id: req.sessionID }).then(sess => {       
     // })
 })
 
 router.post('/register', (req, res) => {
-    mdb.collection('users').findOne({ email: req.body.email }).then(user => {
+    users.findOne({ email: req.body.email }).then(user => {
         if (user == null) {
-            mdb.collection("users").insert(req.body).then((result) => {
+            users.insertOne(req.body).then((result) => {
                 res.send(result.ops)
             })
         }
@@ -36,7 +47,7 @@ router.post('/register', (req, res) => {
 })
 
 router.post('/login', (req, res) => {
-    mdb.collection('users').findOne({ email: req.body.email, pwd: req.body.pwd }).then(user => {
+    users.findOne({ email: req.body.email, pwd: req.body.pwd }).then(user => {
         if (user == null) {
             res.send('')
         }
@@ -51,9 +62,9 @@ router.post('/login', (req, res) => {
 })
 
 router.post('/loginwithgoogle', (req, res) => {
-    mdb.collection('users').findOne({ email: req.body.email }).then(user => {
+    users.findOne({ email: req.body.email }).then(user => {
         if (user == null) {
-            mdb.collection('users').insert(req.body).then(result => {
+            users.insertOne(req.body).then(result => {
                 let obj = {}
                 obj._id = result.ops[0]._id
                 obj.name = result.ops[0].name
@@ -74,21 +85,21 @@ router.get('/logout', (req, res) => {
 })
 
 router.post('/addimage', (req, res) => {
-    mdb.collection('pins').insert(req.body).then(result => {
+    pins.insertOne(req.body).then(result => {
         res.send(result.ops)
     })
 })
 
 router.get('/getmyimages/:user_id', (req, res) => {
-    mdb.collection('pins').find({ user_id: req.params.user_id }).toArray((err, pins) => {
+    pins.find({ user_id: req.params.user_id }).toArray((err, pins) => {
         res.send(pins)
     })
 })
 
 router.post('/deleteimage/', (req, res) => {
     console.log(req.body)
-    mdb.collection('pins').remove({ _id: ObjectID(req.body.pin_id) }).then(result => {
-        mdb.collection('pins').find({ user_id: req.body.user_id }).toArray((err, pins) => {
+    pins.deleteOne({ _id: ObjectId(req.body.pin_id) }).then(result => {
+        database.collection('pins').find({ user_id: req.body.user_id }).toArray((err, pins) => {
             res.send(pins)
         })
 
@@ -96,28 +107,28 @@ router.post('/deleteimage/', (req, res) => {
 })
 
 router.get('/getallimages', (req, res) => {
-    mdb.collection('pins').find().toArray((err, pins) => {
+    pins.find().toArray((err, pins) => {
         res.send(pins)
     })
 })
 
 router.post('/updatehearts', (req, res) => {
-    mdb.collection('pins').findOne({ _id: ObjectID(req.body.pinid), heart_by: req.body.heart_by }).then(result1 => {
+    pins.findOne({ _id: ObjectId(req.body.pinid), heart_by: req.body.heart_by }).then(result1 => {
         if (!result1) {
-            mdb.collection('pins').update({ _id: ObjectID(req.body.pinid) }, { $set: { hearts: req.body.hearts, heart_by: req.body.heart_by } }).then(result2 => {
-                mdb.collection('pins').findOne({ _id: ObjectID(req.body.pinid) }).then(pin => {
+            pins.updateOne({ _id: ObjectId(req.body.pinid) }, { $set: { hearts: req.body.hearts, heart_by: req.body.heart_by } }).then(result2 => {
+                pins.findOne({ _id: ObjectId(req.body.pinid) }).then(pin => {
                     res.send(pin)
                 })
             })
         }
-        else{
-           res.send('Already liked') 
+        else {
+            res.send('Already liked')
         }
     })
 })
 
 router.post('/filterbyuser/:user', (req, res) => {
-    mdb.collection('pins').find({user_name: req.params.user}).toArray((err, pins) => {
+    pins.find({ user_name: req.params.user }).toArray((err, pins) => {
         res.send(pins)
     })
 })
